@@ -1,6 +1,6 @@
 ---
 created: 2026-05-15
-modified: 2026-05-18 10:44:43
+modified: 2026-05-18 10:49:49
 accessed: 2026-05-18 10:44:57
 ---
 # ProbeDriver2 
@@ -194,9 +194,8 @@ While in the `S4_Fini` state:
 |       |     |         |                       |
  
 ##  trigger_out_v : `Control1[15:0]` 
-## duration_out : `Control2[15:0]` 
+##  duration : `Control2[15:0]`
 ##  threshold_v : `Control3[15:0]` 
-##  duration : `Control4[15:0]`
 
 
 
