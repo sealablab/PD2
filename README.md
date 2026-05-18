@@ -1,7 +1,7 @@
 ---
 created: 2026-05-18
-modified: 2026-05-18 10:58:14
-accessed: 2026-05-18 12:54:31
+modified: 2026-05-18 17:14:46
+accessed: 2026-05-18 17:20:10
 ---
 # ProbeDriver2
 
@@ -91,19 +91,19 @@ This ensures that trigger threshold, output voltages, and timing remain stable d
 
 All control registers are 32-bit. Control[1] through control[4] are latched on RESET command; control[0] is read continuously every cycle.
 
-| Register   | Bits    | Name            | Format        | Description |
-|:-----------|:-------:|:----------------|:--------------|:------------|
-| control[0] | [31]    | ARM             | Single-bit    | Output enable: 1 = outputs allowed per FSM state, 0 = outputs forced to zero |
-| control[0] | [30]    | RESET           | Single-bit    | High-to-low transition latches control[1:4] and enters S_Reset state |
-| control[0] | [29:0]  | reserved        | —             | Reserved for future use |
-| control[1] | [15:0]  | trigger_out_v   | Signed 16-bit | DC voltage (LSBs) to drive `outputa` during Fire state |
-| control[1] | [31:16] | unused          | —             | Ignored |
-| control[2] | [15:0]  | intensity_out_v | Signed 16-bit | DC voltage (LSBs) to drive `outputb` during Fire state |
-| control[2] | [31:16] | unused          | —             | Ignored |
-| control[3] | [15:0]  | threshold_v     | Signed 16-bit | Trigger threshold (LSBs); Fire triggered when `inputa > threshold_v` in Idle state |
-| control[3] | [31:16] | unused          | —             | Ignored |
-| control[4] | [15:0]  | duration        | Unsigned 16-bit | Number of clock cycles for Fire state; Cooldown is 2× this value |
-| control[4] | [31:16] | unused          | —             | Ignored |
+| Register   |  Bits   | Name            | Format          | Description                                                                        |
+| :--------- | :-----: | :-------------- | :-------------- | :--------------------------------------------------------------------------------- |
+| control[0] |  [31]   | ARM             | Single-bit      | Output enable: 1 = outputs allowed per FSM state, 0 = outputs forced to zero       |
+| control[0] |  [30]   | RESET           | Single-bit      | High-to-low transition latches control[1:4] and enters S_Reset state               |
+| control[0] | [29:0]  | reserved        | —               | Reserved for future use                                                            |
+| control[1] | [15:0]  | trigger_out_v   | Signed 16-bit   | DC voltage (LSBs) to drive `outputa` during Fire state                             |
+| control[1] | [31:16] | unused          | —               | Ignored                                                                            |
+| control[2] | [15:0]  | intensity_out_v | Signed 16-bit   | DC voltage (LSBs) to drive `outputb` during Fire state                             |
+| control[2] | [31:16] | unused          | —               | Ignored                                                                            |
+| control[3] | [15:0]  | threshold_v     | Signed 16-bit   | Trigger threshold (LSBs); Fire triggered when `inputa > threshold_v` in Idle state |
+| control[3] | [31:16] | unused          | —               | Ignored                                                                            |
+| control[4] | [15:0]  | duration        | Unsigned 16-bit | Number of clock cycles for Fire state; Cooldown is 2× this value                   |
+| control[4] | [31:16] | unused          | —               | Ignored                                                                            |
 
 ### Control Register Constraints
 
