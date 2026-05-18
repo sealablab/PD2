@@ -9,7 +9,7 @@ accessed: 2026-05-18 12:54:31
 
 ## Overview
 
-ProbeDriver2 is a voltage-triggered dual-output pulse generator for the **Moku:Go** platform (31.25 MHz clock, 16-bit signed I/O). Monitors an analog input and, when a configurable threshold is exceeded, generates two independent DC voltage outputs for a specified duration followed by a mandatory cooldown period. Designed for driving fault injection probes (Riscure DS1120 EMFI probe) with single-shot trigger-to-pulse operation.
+ProbeDriver2 is a voltage-triggered dual-output pulse generator for the **Moku:Go** platform (31.25 MHz clock, 16-bit signed I/O). Monitors an analog input and, when a configurable threshold is exceeded, generates two independent DC voltage outputs for a specified duration followed by a mandatory cooldown period. Designed for driving fault injection probes (NewAE Chipshouter EMFI probe) with single-shot trigger-to-pulse operation.
 
 ---
 
