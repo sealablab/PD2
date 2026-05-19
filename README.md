@@ -4,10 +4,16 @@ modified: 2026-05-18 17:57:21
 accessed: 2026-05-18 18:17:37
 ---
 # ProbeDriver2
+``` git clone git@github.com:sealablab/PD2.git ```
 
-## Running / debugging
+## Pre-reqa
 
-``` mokucli instrument download 4.2.2 ```
+``` mokucli instrument download 4.2.2 
+	git clone https://github.com/sealablab/PD2.git
+	cd PD2
+	uv sync
+	uv run probedriver2
+```
 
 
 ---
