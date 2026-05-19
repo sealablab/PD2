@@ -14,7 +14,7 @@ from . import _encoding as enc
 from ._state import State
 
 if TYPE_CHECKING:
-    from moku.instruments import CloudCompile
+    from moku.instruments import CustomInstrument
 
 # Control register addresses (DESIGN_SPEC.md §6.3).
 CTRL_FLAGS = 0
@@ -49,9 +49,9 @@ class ProbeDriver2:
     ) -> None:
         # Imported lazily so the module is importable without `moku` installed
         # (e.g. for unit-testing the encoding helpers).
-        from moku.instruments import CloudCompile
+        from moku.instruments import CustomInstrument
 
-        self._cc: CloudCompile = CloudCompile(
+        self._ci: CustomInstrument = CustomInstrument(
             ip,
             bitstream=str(bitstream),
             force_connect=force_connect,
@@ -74,14 +74,14 @@ class ProbeDriver2:
 
     def close(self) -> None:
         """Release the Moku for other clients."""
-        relinquish = getattr(self._cc, "relinquish_ownership", None)
+        relinquish = getattr(self._ci, "relinquish_ownership", None)
         if relinquish is not None:
             relinquish()
 
     @property
-    def cc(self) -> "CloudCompile":
-        """Underlying Moku CloudCompile handle (escape hatch)."""
-        return self._cc
+    def ci(self) -> "CustomInstrument":
+        """Underlying Moku CustomInstrument handle (escape hatch)."""
+        return self._ci
 
     # ------------------------------------------------------------------
     # Configuration
@@ -107,13 +107,14 @@ class ProbeDriver2:
         duration_cycles = enc.microseconds_to_cycles(duration_us)
 
         # Write parameter registers first; RTL only reads them on the latch edge.
-        self._cc.set_controls(
-            {
-                CTRL_TRIGGER_V: enc.pack_signed16(trigger_lsb),
-                CTRL_INTENSITY_V: enc.pack_signed16(intensity_lsb),
-                CTRL_THRESHOLD_V: enc.pack_signed16(threshold_lsb),
-                CTRL_DURATION: enc.pack_unsigned16(duration_cycles),
-            }
+        # CustomInstrument.set_controls takes a list of {"id", "value"} maps.
+        self._ci.set_controls(
+            [
+                {"id": CTRL_TRIGGER_V, "value": enc.pack_signed16(trigger_lsb)},
+                {"id": CTRL_INTENSITY_V, "value": enc.pack_signed16(intensity_lsb)},
+                {"id": CTRL_THRESHOLD_V, "value": enc.pack_signed16(threshold_lsb)},
+                {"id": CTRL_DURATION, "value": enc.pack_unsigned16(duration_cycles)},
+            ]
         )
         # Pulse RESET high→low to latch parameters and re-enter S_Idle.
         self._pulse_reset()
@@ -174,7 +175,7 @@ class ProbeDriver2:
     # ------------------------------------------------------------------
 
     def _write_flags(self, *, arm: bool, reset: bool) -> None:
-        self._cc.set_control(CTRL_FLAGS, enc.pack_control0(arm=arm, reset=reset))
+        self._ci.set_control(CTRL_FLAGS, enc.pack_control0(arm=arm, reset=reset))
 
     def _pulse_reset(self) -> None:
         # RESET is edge-triggered (DR-1): drive high, then low.  Preserve
@@ -183,16 +184,29 @@ class ProbeDriver2:
         self._write_flags(arm=self._armed, reset=False)
 
     def _read_status0(self) -> int:
-        """Return the integer value of status[0] from getters()."""
-        snapshot = self._cc.getters()
+        """Return the integer value of status[0] from get_status()."""
+        snapshot = self._ci.get_status()
+
+        # If the API returns a bare list of status words, index directly.
+        if isinstance(snapshot, list) and snapshot:
+            return int(snapshot[0])
 
         # Common shapes the Moku API has used for status:
         #   {"status": [v0, v1, ...]}
+        #   {"status": [{"id": 0, "value": v0}, ...]}
         #   {"status_0": v0, "status_1": v1, ...}
         #   {"status0": v0, ...}
         status = snapshot.get("status") if isinstance(snapshot, dict) else None
         if isinstance(status, list) and status:
-            return int(status[0])
+            first = status[0]
+            if isinstance(first, dict) and "value" in first:
+                # List-of-{id,value} shape — find id == 0 explicitly so we
+                # don't depend on registers arriving in order.
+                for entry in status:
+                    if entry.get("id") == 0:
+                        return int(entry["value"])
+                return int(first["value"])
+            return int(first)
         if isinstance(status, dict) and 0 in status:
             return int(status[0])
 
@@ -201,6 +215,6 @@ class ProbeDriver2:
                 return int(snapshot[key])
 
         raise RuntimeError(
-            "could not locate status[0] in CloudCompile.getters() response; "
+            "could not locate status[0] in CustomInstrument.get_status() response; "
             f"keys present: {sorted(snapshot.keys()) if isinstance(snapshot, dict) else type(snapshot).__name__}"
         )

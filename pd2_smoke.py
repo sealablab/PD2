@@ -57,8 +57,8 @@ def main() -> int:
         # ----- Phase 0 : baseline ------------------------------------------------
         print("Phase 0: post-connect baseline (driver __init__ wrote ARM=0 RESET=0)")
         dump_status(pd, "baseline")
-        snap = pd._cc.getters()
-        print(f"  getters() top-level type: {type(snap).__name__}; "
+        snap = pd._ci.get_status()
+        print(f"  get_status() top-level type: {type(snap).__name__}; "
               f"keys: {sorted(snap.keys()) if isinstance(snap, dict) else 'n/a'}")
 
         # ----- Phase 1 : configure with non-firing threshold, ARM still off -----
