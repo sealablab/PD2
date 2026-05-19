@@ -12,6 +12,7 @@ accessed: 2026-05-18 18:17:37
 	git clone https://github.com/sealablab/PD2.git
 	cd PD2
 	uv sync
+	source .venv/bin/activate
 	uv run probedriver2
 ```
 
